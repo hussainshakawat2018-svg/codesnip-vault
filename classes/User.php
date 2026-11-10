@@ -77,4 +77,78 @@ class User {
 
         return $user;
     }
+
+    /**
+     * Get user details by ID
+     */
+    public function getUserById($id) {
+        $stmt = $this->pdo->prepare("SELECT id, username, email, role, dark_mode, created_at FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch();
+    }
+
+    /**
+     * Update username and email
+     */
+    public function updateProfile($id, $username, $email) {
+        if (empty($username) || empty($email)) {
+            return "Username and email cannot be empty.";
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return "Invalid email format.";
+        }
+
+        // Check if username taken by someone else
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ? AND id != ?");
+        $stmt->execute([$username, $id]);
+        if ($stmt->fetch()) {
+            return "Username already taken by another account.";
+        }
+
+        // Check if email taken by someone else
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
+        $stmt->execute([$email, $id]);
+        if ($stmt->fetch()) {
+            return "Email already taken by another account.";
+        }
+
+        $updateStmt = $this->pdo->prepare("UPDATE users SET username = ?, email = ? WHERE id = ?");
+        $updateStmt->execute([$username, $email, $id]);
+
+        return true;
+    }
+
+    /**
+     * Change user password securely
+     */
+    public function updatePassword($id, $current_password, $new_password, $confirm_password) {
+        if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
+            return "All password fields are required.";
+        }
+
+        if (strlen($new_password) < 6) {
+            return "New password must be at least 6 characters.";
+        }
+
+        if ($new_password !== $confirm_password) {
+            return "New passwords do not match.";
+        }
+
+        // Fetch current password hash
+        $stmt = $this->pdo->prepare("SELECT password FROM users WHERE id = ?");
+        $stmt->execute([$id]);
+        $user = $stmt->fetch();
+
+        if (!$user || !password_verify($current_password, $user['password'])) {
+            return "Current password is incorrect.";
+        }
+
+        // Hash new password and update
+        $hashed = password_hash($new_password, PASSWORD_DEFAULT);
+        $updateStmt = $this->pdo->prepare("UPDATE users SET password = ? WHERE id = ?");
+        $updateStmt->execute([$hashed, $id]);
+
+        return true;
+    }
 }
