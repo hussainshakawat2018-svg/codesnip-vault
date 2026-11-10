@@ -53,26 +53,26 @@ class User {
     }
 
     /**
-     * Login a user
+     * Login a user by email OR username
      * Returns user data array on success, or an error message string on failure
      */
-    public function login($email, $password) {
-        if (empty($email) || empty($password)) {
+    public function login($identifier, $password) {
+        if (empty($identifier) || empty($password)) {
             return "All fields are required.";
         }
 
-        // Find user by email
-        $stmt = $this->pdo->prepare("SELECT id, username, email, password, role, dark_mode FROM users WHERE email = ?");
-        $stmt->execute([$email]);
+        // Find user by username OR email
+        $stmt = $this->pdo->prepare("SELECT id, username, email, password, role, dark_mode FROM users WHERE email = ? OR username = ? LIMIT 1");
+        $stmt->execute([$identifier, $identifier]);
         $user = $stmt->fetch();
 
         if (!$user) {
-            return "Invalid email or password.";
+            return "Invalid username/email or password.";
         }
 
         // Verify password
         if (!password_verify($password, $user['password'])) {
-            return "Invalid email or password.";
+            return "Invalid username/email or password.";
         }
 
         return $user;
