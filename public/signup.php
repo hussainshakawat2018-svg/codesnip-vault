@@ -25,7 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $user->register($username, $email, $password, $confirm_password);
 
     if ($result === true) {
-        $success = "Account created successfully! You can now log in.";
+        header("Location: signup_success.php");
+        exit;
     } else {
         $error = $result;
     }
