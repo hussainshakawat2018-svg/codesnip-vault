@@ -135,14 +135,19 @@ require_once __DIR__ . '/../includes/header.php';
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-2 border-top">
                             <div>
                                 <a href="snippet_form.php?id=<?php echo $s['id']; ?>" class="btn btn-sm btn-outline-primary me-2">Edit</a>
-                                <button class="btn btn-sm btn-outline-danger delete-btn" data-id="<?php echo $s['id']; ?>">
+                                <button class="btn btn-sm btn-outline-danger delete-btn me-2" data-id="<?php echo $s['id']; ?>">
                                     Delete
                                 </button>
+                                
+                                <!-- Share / Stop Sharing Toggle Button -->
+                                <a href="toggle_share.php?id=<?php echo $s['id']; ?>" class="btn btn-sm <?php echo $s['is_public'] ? 'btn-outline-warning' : 'btn-outline-success'; ?>">
+                                    <?php echo $s['is_public'] ? '🔒 Revoke Share' : '🔗 Share'; ?>
+                                </a>
                             </div>
                             <div>
                                 <?php if ($s['is_public'] && !empty($s['share_token'])): ?>
-                                    <a href="share.php?token=<?php echo urlencode($s['share_token']); ?>" target="_blank" class="btn btn-sm btn-outline-success">
-                                        View Share Link ↗
+                                    <a href="share.php?token=<?php echo urlencode($s['share_token']); ?>" target="_blank" class="btn btn-sm btn-success">
+                                        View Public Link ↗
                                     </a>
                                 <?php endif; ?>
                             </div>
